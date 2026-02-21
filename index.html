@@ -3,278 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Fox Chat Pro | Liquid Glass</title>
+    <title>Fox Chat Ultra | Liquid Glass</title>
     
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --fox-glow: #f97316; }
-        body { margin: 0; background: #0a0a0b; color: white; overflow: hidden; font-family: 'Inter', sans-serif; }
+        :root { --cyan: #06b6d4; --violet: #8b5cf6; }
+        * { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body { margin: 0; background: #05050a; color: white; height: 100dvh; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+
+        /* --- ADVANCED AURORA BACKGROUND --- */
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background: linear-gradient(135deg, #05051a 0%, #0d0121 50%, #05050a 100%);
+        }
+        .aurora-layer {
+            position: absolute; width: 150%; height: 150%;
+            background: radial-gradient(circle at 50% 50%, #4338ca 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, #7c3aed 0%, transparent 40%),
+                        radial-gradient(circle at 10% 80%, #0891b2 0%, transparent 40%);
+            filter: blur(100px); opacity: 0.25;
+            animation: aurora-motion 20s infinite alternate ease-in-out;
+        }
+        @keyframes aurora-motion { 0% { transform: translate(-10%, -10%) rotate(0deg); } 100% { transform: translate(5%, 5%) rotate(10deg); } }
 
         /* --- LIQUID GLASS UI --- */
         .liquid-glass {
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Animated Background Orbs */
-        .bg-glow {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #1a1a1c 0%, #050505 100%);
-        }
-        .glow-orb {
-            position: absolute; width: 400px; height: 400px; border-radius: 50%;
-            background: var(--fox-glow); opacity: 0.07; filter: blur(100px);
-            animation: move 25s infinite alternate ease-in-out;
-        }
-        @keyframes move { 
-            0% { transform: translate(-20%, -20%); } 
-            100% { transform: translate(120%, 120%); } 
-        }
+        /* --- MODAL --- */
+        #settings-modal { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 300; }
+        .modal-hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
 
-        /* Sidebar Logic */
-        #sidebar {
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
-        }
-        /* Mobile par default hidden */
-        .sidebar-hidden { transform: translateX(-100%); opacity: 0; visibility: hidden; }
+        /* --- CHAT BUBBLES --- */
+        .user-bubble { background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); color: #cffafe; border-radius: 20px 20px 4px 20px; box-shadow: 0 0 20px rgba(6,182,212,0.1); }
+        .ai-bubble { background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); color: #ede9fe; border-radius: 20px 20px 20px 4px; box-shadow: 0 0 20px rgba(139,92,246,0.1); }
 
-        /* Smooth Typing Animation */
-        .cursor-blink::after {
-            content: '▋'; animation: blink 1s step-end infinite; color: var(--fox-glow);
-        }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .msg-appear { animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Custom Scrollbar */
+        #sidebar { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100; }
+        .sidebar-hidden { transform: translateX(-110%); }
+
+        .style-btn { 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 6px 14px; border-radius: 12px; font-size: 11px; transition: 0.3s;
+        }
+        .style-btn.active { background: var(--cyan); color: black; border-color: var(--cyan); font-weight: 800; }
+
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(249, 115, 22, 0.4); border-radius: 10px; }
-
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
-<body class="h-[100dvh] flex flex-col">
+<body class="flex w-full h-full p-2 md:p-6 gap-6 relative">
 
-    <div class="bg-glow">
-        <div class="glow-orb" style="top: 10%; left: 10%;"></div>
-        <div class="glow-orb" style="bottom: 10%; right: 10%; background: #ef4444;"></div>
+    <div class="aurora-bg"><div class="aurora-layer"></div></div>
+
+    <div id="settings-modal" class="fixed inset-0 flex items-center justify-center p-4 modal-hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-xl" onclick="toggleSettings()"></div>
+        <div class="liquid-glass w-full max-w-md p-8 rounded-[2.5rem] relative z-10 border-white/20">
+            <h3 class="text-2xl font-black mb-2 text-cyan-400">API CONFIG</h3>
+            <p class="text-gray-400 text-sm mb-6 leading-relaxed">Apni OpenRouter Key yahan save karein. Yeh sirf aapke browser mein secure rahegi.</p>
+            <input type="password" id="api-key-input" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-cyan-500 mb-6" placeholder="sk-or-v1-...">
+            <div class="flex gap-3">
+                <button onclick="saveApiKey()" class="flex-1 py-4 bg-cyan-500 text-black font-extrabold rounded-2xl hover:scale-105 transition-all">SAVE KEY</button>
+                <button onclick="toggleSettings()" class="flex-1 py-4 bg-white/10 rounded-2xl font-bold hover:bg-white/20 transition-all">CANCEL</button>
+            </div>
+        </div>
     </div>
 
-    <div id="overlay" class="fixed inset-0 bg-black/60 z-[90] hidden backdrop-blur-sm transition-opacity" onclick="toggleSidebar()"></div>
-
-    <div class="flex h-full w-full relative">
-        
-        <aside id="sidebar" class="w-72 h-full liquid-glass absolute md:relative sidebar-hidden md:translate-x-0 md:opacity-100 md:visible flex flex-col p-6">
-            <div class="flex items-center justify-between mb-8">
-                <div class="flex items-center gap-3">
-                    <img src="https://t3.ftcdn.net/jpg/08/63/01/66/360_F_863016640_fdXeQ7Olm2XJv7BulETweOBaRlUg4lLL.jpg" class="w-8 h-8 rounded-lg">
-                    <h2 class="text-orange-500 font-black tracking-tighter text-xl">FOX CHAT</h2>
-                </div>
-                <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-white">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
+    <div id="overlay" class="fixed inset-0 bg-black/60 z-[90] hidden backdrop-blur-md" onclick="toggleSidebar()"></div>
+    <aside id="sidebar" class="sidebar-hidden md:flex md:static absolute left-0 top-0 h-full w-[300px] liquid-glass flex-col p-6 rounded-[2.5rem]">
+        <div class="flex items-center gap-3 mb-12 px-2">
+            <div class="w-10 h-10 bg-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                <i class="fa-solid fa-bolt text-black text-xl"></i>
             </div>
+            <h2 class="text-xl font-black tracking-tighter">FOX ULTRA</h2>
+        </div>
 
-            <button onclick="window.location.reload()" class="w-full py-3 px-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl text-orange-500 font-bold text-sm mb-6 hover:bg-orange-500/20 transition-all flex items-center justify-center gap-2">
-                <i class="fa-solid fa-plus"></i> New Chat
+        <nav class="flex-1 space-y-4 overflow-y-auto">
+            <button onclick="window.location.reload()" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold flex items-center gap-3 hover:bg-white/10 transition-all">
+                <i class="fa-solid fa-plus text-cyan-400"></i> New Session
             </button>
+            <div class="p-4 rounded-2xl border border-white/5 text-[10px] text-gray-500 text-center tracking-widest uppercase">History Empty</div>
+        </nav>
 
-            <div class="flex-1 overflow-y-auto space-y-2" id="history-list">
-                <div class="p-4 rounded-2xl bg-white/5 border border-white/5 text-[10px] text-gray-500 text-center uppercase tracking-widest">
-                    Conversations
+        <div class="pt-6 border-t border-white/10 space-y-3">
+            <button onclick="toggleSettings()" class="w-full p-4 liquid-glass rounded-2xl border-cyan-500/20 flex items-center gap-3 hover:bg-cyan-500/10 transition-all">
+                <i class="fa-solid fa-key text-cyan-400"></i>
+                <span class="text-sm font-bold text-gray-200">API Settings</span>
+            </button>
+            <a href="https://t.me/urrkalil" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-sky-500/10 transition-all">
+                <i class="fa-brands fa-telegram text-sky-400 text-2xl"></i>
+                <div class="text-xs font-black">tg: @urrkalil</div>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col liquid-glass rounded-[2.5rem] overflow-hidden relative">
+        <header class="p-6 flex items-center justify-between border-b border-white/5 bg-white/5">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden p-2 text-cyan-400"><i class="fa-solid fa-bars-staggered"></i></button>
+                <h3 class="text-xs font-black tracking-widest text-gray-500 uppercase">Neural Intelligence</h3>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="text-[10px] font-bold text-gray-400">ACTIVE</span>
+            </div>
+        </header>
+
+        <div id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-10 space-y-8 scroll-smooth">
+            <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center">
+                <div class="relative mb-8">
+                    <div class="absolute inset-0 bg-cyan-500 blur-3xl opacity-20 animate-pulse"></div>
+                    <img src="https://t3.ftcdn.net/jpg/08/63/01/66/360_F_863016640_fdXeQ7Olm2XJv7BulETweOBaRlUg4lLL.jpg" class="w-24 h-24 rounded-[2.5rem] border border-white/20 relative shadow-2xl">
                 </div>
+                <h1 class="text-4xl font-black tracking-tighter mb-4">Hello, Ahmed.</h1>
+                <p class="text-gray-400 text-sm max-w-xs mx-auto leading-relaxed">Setup your key in settings to unlock the deepseek brain.</p>
             </div>
+        </div>
 
-            <div class="pt-6 border-t border-white/10 mt-auto">
-                <a href="https://t.me/urrkalil" target="_blank" class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 hover:bg-orange-500/10 border border-white/5 hover:border-orange-500/20 transition-all group">
-                    <div class="w-10 h-10 rounded-full bg-sky-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <i class="fa-brands fa-telegram text-sky-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase">Follow Me</p>
-                        <p class="text-sm font-bold text-gray-200">tg: urrkalil</p>
-                    </div>
-                </a>
-            </div>
-        </aside>
+        <div class="px-4 md:px-10 py-2 flex gap-2 flex-wrap overflow-x-auto no-scrollbar">
+            <button onclick="setStyle('Anime', this)" class="style-btn">Anime</button>
+            <button onclick="setStyle('Realistic', this)" class="style-btn">Realistic</button>
+            <button onclick="setStyle('Cyberpunk', this)" class="style-btn">Cyberpunk</button>
+            <button onclick="setStyle('3D Render', this)" class="style-btn">3D Render</button>
+        </div>
 
-        <main class="flex-1 flex flex-col h-full relative min-w-0">
-            
-            <header class="p-4 flex items-center justify-between z-50">
-                <button onclick="toggleSidebar()" class="p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all">
-                    <i class="fa-solid fa-bars-staggered text-orange-500"></i>
+        <div class="p-4 md:p-10 pt-2">
+            <div class="max-w-4xl mx-auto flex items-end gap-3 liquid-glass p-2 rounded-[2rem] border-white/10 focus-within:border-cyan-500/50 transition-all">
+                <button class="p-3 text-gray-500 hover:text-cyan-400"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+                <textarea id="chat-input" rows="1" class="flex-1 bg-transparent p-3 outline-none text-white text-sm md:text-base resize-none" placeholder="Message or 'Generate image of...'"></textarea>
+                <button id="btn-send" class="w-14 h-14 bg-cyan-500 text-black rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30 hover:scale-105 active:scale-95 transition-all">
+                    <i class="fa-solid fa-arrow-up text-xl"></i>
                 </button>
-                <div class="text-[10px] font-black text-gray-500 tracking-[0.2em] uppercase">Liquid Glass v2.0</div>
-                <div class="w-10"></div> </header>
-
-            <div id="chat-container" class="flex-1 overflow-y-auto px-4 md:px-32 py-6 space-y-8 scroll-smooth">
-                
-                <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center">
-                    <div class="relative mb-8">
-                        <div class="absolute inset-0 bg-orange-500 blur-[60px] opacity-20 animate-pulse"></div>
-                        <img src="https://t3.ftcdn.net/jpg/08/63/01/66/360_F_863016640_fdXeQ7Olm2XJv7BulETweOBaRlUg4lLL.jpg" class="w-24 h-24 rounded-[2.5rem] relative border border-white/10 shadow-2xl">
-                    </div>
-                    <h2 id="dynamic-greeting" class="text-4xl md:text-5xl font-black mb-4 tracking-tighter transition-all duration-700">Hello, Ahmed!</h2>
-                    <p class="text-gray-400 text-sm max-w-xs mx-auto leading-relaxed">Art and intelligence combined. Type "Generate" to create images.</p>
-                </div>
             </div>
-
-            <div class="p-4 md:px-32 pb-10">
-                <div class="max-w-4xl mx-auto liquid-glass p-2 rounded-[2rem] flex items-end gap-2">
-                    <textarea id="chat-input" rows="1" class="flex-1 bg-transparent p-4 outline-none resize-none text-sm md:text-base text-white placeholder:text-gray-600" placeholder="Type a message or 'Generate image of...'"></textarea>
-                    <button id="btn-send" class="w-14 h-14 bg-orange-500 text-white rounded-[1.5rem] shadow-xl shadow-orange-500/20 flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
-                        <i class="fa-solid fa-paper-plane text-xl"></i>
-                    </button>
-                </div>
-            </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <script>
-        // --- 1. CONFIGURATION ---
-        const CONFIG = {
-            API_KEY: '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', // APNI KEY YAHAN DALO
-            MODEL: 'arcee-ai/trinity-large-preview:free'
-        };
-
+        let apiKey = localStorage.getItem('FOX_SECRET_KEY') || '';
+        let currentStyle = "";
         const state = { isGenerating: false };
 
-        // --- 2. SIDEBAR TOGGLE ---
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.toggle('sidebar-hidden');
-            overlay.classList.toggle('hidden');
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.toggle('modal-hidden');
+            if(!modal.classList.contains('modal-hidden')) document.getElementById('api-key-input').value = apiKey;
         }
 
-        // --- 3. DYNAMIC GREETINGS ---
-        const greetings = [
-            "Hello, Ahmed!",
-            "Need some Art?",
-            "Ask me Anything...",
-            "What's on your mind?",
-            "Fox is Thinking...",
-            "Let's be Creative!"
-        ];
-        let gIdx = 0;
-        setInterval(() => {
-            const el = document.getElementById('dynamic-greeting');
-            if (el && !state.isGenerating) {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(-10px)';
-                setTimeout(() => {
-                    gIdx = (gIdx + 1) % greetings.length;
-                    el.textContent = greetings[gIdx];
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0)';
-                }, 700);
+        function saveApiKey() {
+            const val = document.getElementById('api-key-input').value.trim();
+            if(val) {
+                apiKey = val;
+                localStorage.setItem('FOX_SECRET_KEY', val);
+                alert("Key secured successfully!");
+                toggleSettings();
             }
-        }, 4000);
+        }
 
-        // --- 4. CHAT LOGIC ---
-        const els = {
-            container: document.getElementById('chat-container'),
-            input: document.getElementById('chat-input'),
-            btn: document.getElementById('btn-send'),
-            welcome: document.getElementById('welcome-screen')
-        };
+        function setStyle(s, btn) {
+            document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+            if(currentStyle === s) { currentStyle = ""; } 
+            else { currentStyle = s; btn.classList.add('active'); }
+        }
 
-        function appendMessageUI(role, content, isImg = false) {
-            els.welcome.classList.add('hidden');
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-hidden');
+            document.getElementById('overlay').classList.toggle('hidden');
+        }
+
+        function appendUI(role, content, isImg = false) {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            const container = document.getElementById('chat-container');
             const wrap = document.createElement('div');
-            wrap.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} mb-6 fade-in`;
+            wrap.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} mb-6 msg-appear`;
             
-            if (role === 'user') {
-                wrap.innerHTML = `<div class="liquid-glass px-6 py-3 rounded-[2rem] rounded-tr-none max-w-[85%] text-sm font-medium border-orange-500/20 text-white">${content}</div>`;
+            if(role === 'user') {
+                wrap.innerHTML = `<div class="user-bubble px-6 py-3 max-w-[85%] text-sm font-medium">${content}</div>`;
             } else {
                 wrap.innerHTML = `
-                    <div class="flex gap-4 w-full">
-                        <div class="w-10 h-10 rounded-2xl liquid-glass flex-shrink-0 flex items-center justify-center border-orange-500/20">
-                            <img src="https://t3.ftcdn.net/jpg/08/63/01/66/360_F_863016640_fdXeQ7Olm2XJv7BulETweOBaRlUg4lLL.jpg" class="w-8 h-8 rounded-lg">
-                        </div>
-                        <div class="flex-1 overflow-hidden">
-                            ${isImg ? 
-                                `<div class="max-w-sm rounded-3xl overflow-hidden border border-white/10 shadow-2xl animate-pulse bg-white/5">
-                                    <img src="${content}" class="w-full h-full object-cover" onload="this.parentElement.classList.remove('animate-pulse')">
-                                </div>` : 
-                                `<div class="prose prose-invert prose-orange text-sm max-w-none leading-relaxed cursor-blink">${marked.parse(content)}</div>`
-                            }
-                        </div>
-                    </div>`;
+                <div class="flex gap-4 w-full">
+                    <div class="w-10 h-10 rounded-2xl liquid-glass flex-shrink-0 flex items-center justify-center border-white/10">
+                        <i class="fa-solid fa-fox text-cyan-400"></i>
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        ${isImg ? `
+                            <div class="liquid-glass p-2 rounded-3xl max-w-sm inline-block">
+                                <img src="${content}" class="rounded-2xl w-full shadow-2xl">
+                                <a href="${content}" target="_blank" class="block text-center mt-3 text-[10px] text-cyan-400 font-black uppercase tracking-widest">Download Art</a>
+                            </div>` : `<div class="ai-bubble px-6 py-4 prose prose-invert prose-cyan text-sm max-w-none">${marked.parse(content)}</div>`}
+                    </div>
+                </div>`;
             }
-            els.container.appendChild(wrap);
-            els.container.scrollTop = els.container.scrollHeight;
-            return wrap;
+            container.appendChild(wrap);
+            container.scrollTop = container.scrollHeight;
         }
 
         async function handleSend() {
-            const prompt = els.input.value.trim();
-            if (!prompt || state.isGenerating) return;
+            const input = document.getElementById('chat-input');
+            const prompt = input.value.trim();
+            if(!prompt || state.isGenerating) return;
 
-            appendMessageUI('user', prompt);
-            els.input.value = '';
-            els.input.style.height = 'auto';
+            if(!apiKey && !/image|generate/i.test(prompt)) {
+                alert("Pehle Sidebar mein API Key set karein!");
+                toggleSettings();
+                return;
+            }
+
+            appendUI('user', prompt);
+            input.value = '';
+            input.style.height = 'auto';
             state.isGenerating = true;
 
-            const isImage = /image|generate|draw|paint|photo/i.test(prompt);
-
-            if (isImage) {
+            if(/image|generate|draw/i.test(prompt)) {
+                const finalPrompt = currentStyle ? `${prompt}, in ${currentStyle} style` : prompt;
                 const seed = Math.floor(Math.random() * 999999);
-                const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true`;
-                appendMessageUI('assistant', imgUrl, true);
-                state.isGenerating = false;
+                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&seed=${seed}&nologo=true`;
+                setTimeout(() => {
+                    appendUI('assistant', imgUrl, true);
+                    state.isGenerating = false;
+                }, 1000);
             } else {
-                const msgWrap = appendMessageUI('assistant', '...');
-                const prose = msgWrap.querySelector('.prose');
-                let fullText = "";
-
                 try {
                     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                         method: 'POST',
-                        headers: { 'Authorization': `Bearer ${CONFIG.API_KEY}`, 'Content-Type': 'application/json' },
+                        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            model: CONFIG.MODEL,
-                            messages: [{ role: 'user', content: prompt }],
+                            model: "deepseek/deepseek-r1:free",
+                            messages: [{role: "user", content: prompt}],
                             stream: true
                         })
                     });
 
                     const reader = res.body.getReader();
                     const decoder = new TextDecoder();
+                    let fullText = "";
+                    const msgWrap = appendUI('assistant', '...');
+                    const proseDiv = msgWrap.querySelector('.prose');
+
                     while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
+                        const {done, value} = await reader.read();
+                        if(done) break;
                         const chunk = decoder.decode(value);
                         const lines = chunk.split('\n');
-                        for (const line of lines) {
-                            if (line.startsWith('data: ')) {
+                        for(const line of lines) {
+                            if(line.startsWith('data: ')) {
                                 try {
                                     const data = JSON.parse(line.slice(6));
                                     fullText += data.choices[0]?.delta?.content || '';
-                                    prose.innerHTML = marked.parse(fullText);
-                                    els.container.scrollTop = els.container.scrollHeight;
-                                } catch (e) {}
+                                    proseDiv.innerHTML = marked.parse(fullText);
+                                    document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+                                } catch(e){}
                             }
                         }
                     }
-                } catch (e) {
-                    prose.innerHTML = "Check connection or API Key.";
-                } finally {
-                    prose.classList.remove('cursor-blink');
-                    state.isGenerating = false;
-                }
+                } catch (e) { appendUI('assistant', "Check API Key or Connection."); }
+                finally { state.isGenerating = false; }
             }
         }
 
-        els.btn.onclick = handleSend;
-        els.input.onkeydown = (e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend());
-        els.input.oninput = function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; };
+        document.getElementById('btn-send').onclick = handleSend;
+        document.getElementById('chat-input').onkeydown = (e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend());
+        document.getElementById('chat-input').oninput = function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; };
     </script>
 </body>
 </html>
